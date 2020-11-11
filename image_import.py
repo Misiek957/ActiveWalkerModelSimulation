@@ -5,7 +5,7 @@ import matplotlib.image as mpimg
 import numpy as np
 from PIL import Image
 import cv2
-%matplotlib inline
+# %matplotlib inline
 
 im = Image.open("cc_fin.bmp")
 im2 = mpimg.imread('cc_fin.bmp')
