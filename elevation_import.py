@@ -21,24 +21,30 @@ class Elevation:
         self.elevDictStatus = 0
         self.loc_url = ''
         self.coordList = []
-        self.elevationValues = []
+        self.elevationValues = [[None] * areaInterval for i in range(areaInterval)]  # Setup a zero matrix
+        # Call initiation functions
+        self.coord_check()
+        self.setup_coordinates()
+        self.request_elevation()
 
     def coord_check(self):
         global elevDict
         # Check if coordinates have been used
-
-        for i in range(len(elevDict['locations'])-1):
-            if (elevDict['locations'][i]['coordinate'] == self.locSelect) & (elevDict['locations'][i]['width'] == self.areaWidth):
+        for i in range(len(elevDict['locations'])):  # TODO: check why (elevDict['locations']-1) was used before
+            if (elevDict['locations'][i]['coordinate'] == self.locSelect) & \
+                    (elevDict['locations'][i]['width'] == self.areaWidth) & \
+                    (elevDict['locations'][i]['interval'] == areaInterval):
                 print('Elevation found for ' + elevDict['locations'][i]['name'] + '\n' + str(elevDict['locations'][i]['coordinate']))
                 self.elevationValues = elevDict['locations'][i]['elevation']
                 self.elevDictStatus = 1
                 break
-            else:
-                print("location not found in storage")
-                continue
+        if self.elevDictStatus == 0:
+            print("location not found in storage")  # TODO: ERROR HANDLING
+
 
     def setup_coordinates(self):
         # Setup Coordinates
+        # TODO: Move to __init__()
         yLen = 111320  # length in metres latitude per degree, same for all points
         yDeg = (self.areaWidth/areaInterval)*(1 / yLen)  # Degree interval for each latitude unit square interval
         xLen = 40075000 * math.cos(self.locSelect[0]) / 360  # length in metres at latitude per degree using radian rule
@@ -66,7 +72,7 @@ class Elevation:
                     self.loc_url = self.loc_url + '|'
             try:
                 # Send request
-                API_URL = 'https://maps.googleapis.com/maps/api/elevation/json?locations=0,0|'+loc_url+'&key='+API_KEY
+                API_URL = 'https://maps.googleapis.com/maps/api/elevation/json?locations=0,0|'+self.loc_url+'&key='+API_KEY
                 request = http.request('GET', API_URL)  # use |
                 print('Request code - ' + str(request.status))
                 locData = request.data
@@ -74,7 +80,9 @@ class Elevation:
                 print('Response status - ' + str(response['status']))
                 print(response)
                 # Sort Elevation data into array
-                self.elevationValues = [[0 for i in range(areaInterval)] for j in range(areaInterval)]
+                # elevTemp = []
+                # elevTemp = [[0 for i in range(areaInterval)] for j in range(areaInterval)]
+
                 i = 0  # column
                 j = 0  # row
                 for k in range(len(self.coordList)):
@@ -90,13 +98,14 @@ class Elevation:
                     'coordinate': self.locSelect,
                     'width': self.areaWidth,
                     'resolution': self.res,
+                    'interval': areaInterval,
                     'elevation': self.elevationValues
                  })
                 with open('elevation_storage.json', 'w') as outfile:
                     json.dump(elevDict, outfile, indent=4)
                     outfile.write('\n')
             except ValueError:
-                print("Unable to request elevation")
+                print("Unable to request elevation")  # TODO: ERROR HANDLING
                 # return
         else:
             print("request skipped")
