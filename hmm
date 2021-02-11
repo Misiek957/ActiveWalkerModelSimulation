@@ -1,0 +1,192 @@
+225ce070 (Misiek 2021-01-29 14:41:16 +0000   1) {
+225ce070 (Misiek 2021-01-29 14:41:16 +0000   2)  "cells": [
+225ce070 (Misiek 2021-01-29 14:41:16 +0000   3)   {
+225ce070 (Misiek 2021-01-29 14:41:16 +0000   4)    "cell_type": "code",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000   5)    "execution_count": 67,
+ead83472 (Misiek 2021-01-31 18:37:02 +0000   6)    "metadata": {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000   7)     "pycharm": {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000   8)      "name": "#%%\n"
+ead83472 (Misiek 2021-01-31 18:37:02 +0000   9)     }
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  10)    },
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  11)    "outputs": [],
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  12)    "source": [
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  13)     "import json\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  14)     "import urllib3\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  15)     "import math\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  16)     "import matplotlib.pyplot as plt\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  17)     "import numpy as np\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  18)     "from scipy.interpolate import interp2d\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  19)     "locName = 'University of Warwick - Piazza'\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  20)     "locSelect = [52.3793,-1.5615]\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  21)     "coordList = []\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  22)     "# locations=[(52.59749,-1.97889),\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  23)     "#            (50.449561, 30.525366),\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  24)     "#            (49.449561, 31.525366)] #(lat,lon) pairs\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  25)     "API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  26)     "loc_url = ''\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  27)     "areaWidth = 300 # 420m MAX\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  28)     "areaInterval = 14 # only EVEN, above 14 package size error\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  29)     "distanceInterval = 1 # Distance in metres represented by 1 output pixel\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  30)     "elevDictStatus = 0\n"
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  31)    ]
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  32)   },
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  33)   {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  34)    "cell_type": "code",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  35)    "execution_count": 68,
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  36)    "outputs": [
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  37)     {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  38)      "name": "stdout",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  39)      "output_type": "stream",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  40)      "text": [
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  41)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  42)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  43)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  44)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  45)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  46)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  47)       "location not found in storage\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  48)       "location not found in storage\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  49)       "location not found in storage\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  50)       "location not found in storage\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  51)       "location not found in storage\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  52)       "Elevation found for University of Warwick - Piazza\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  53)       "[52.3793, -1.5615]\n"
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  54)      ]
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  55)     }
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  56)    ],
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  57)    "source": [
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  58)     "# Check if coordinates have been used\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  59)     "with open(\"elevation_storage.json\") as file:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  60)     "    elevDict = json.load(file)\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  61)     "\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  62)     "for i in range(len(elevDict['locations'])-1):\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  63)     "    if (elevDict['locations'][i]['coordinate'] == locSelect) & (elevDict['locations'][i]['width'] == areaWidth):\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  64)     "        print('Elevation found for ' + elevDict['locations'][i]['name'] + '\\n' + str(elevDict['locations'][i]['coordinate']))\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  65)     "        elevation = elevDict['locations'][i]['elevation']\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  66)     "        elevDictStatus = 1\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  67)     "        break\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  68)     "    else:\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  69)     "        print(\"location not found in storage\")\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  70)     "        continue"
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  71)    ],
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  72)    "metadata": {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  73)     "collapsed": false,
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  74)     "pycharm": {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  75)      "name": "#%%\n"
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  76)     }
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  77)    }
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  78)   },
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  79)   {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  80)    "cell_type": "code",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000  81)    "execution_count": 69,
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  82)    "outputs": [],
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  83)    "source": [
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  84)     "## Setup Coordinates\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  85)     "yLen = 111320  # length in metres latitude per degree, same for all points\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  86)     "yDeg = (areaWidth/areaInterval)*(1 / yLen)  # Degree interval for each latitude unit square interval\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  87)     "xLen = 40075000 * math.cos(locSelect[0]) / 360  # length in metres at latitude per degree using radian rule\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  88)     "xDeg = (areaWidth/areaInterval)*(1 / xLen)  # Degree value at longitude indicating 2m interval\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  89)     "res = [xLen,yLen]\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  90)     "\n",
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000  91)     "# Construct an array of evenly spaced out in a 100x100 square around the selected location, according to specified\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  92)     "for j in range(-int(areaInterval/2), int(areaInterval/2)):\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  93)     "    for i in range(-int(areaInterval/2), int(areaInterval/2)):\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  94)     "        coX = (i*xDeg) + locSelect[0]\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000  95)     "        coY = (j*yDeg) + locSelect[1]\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  96)     "        coXY = (coX, coY)\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000  97)     "        coordList.append((coX, coY))"
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  98)    ],
+225ce070 (Misiek 2021-01-29 14:41:16 +0000  99)    "metadata": {
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 100)     "collapsed": false,
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 101)     "pycharm": {
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 102)      "name": "#%%\n"
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 103)     }
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 104)    }
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 105)   },
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 106)   {
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 107)    "cell_type": "code",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 108)    "execution_count": 70,
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 109)    "metadata": {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 110)     "pycharm": {
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 111)      "name": "#%%\n"
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 112)     }
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 113)    },
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 114)    "outputs": [
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 115)     {
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 116)      "name": "stdout",
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 117)      "output_type": "stream",
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 118)      "text": [
+c4df9765 (Misiek 2021-02-05 12:06:29 +0000 119)       "request skipped\n"
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 120)      ]
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 121)     }
+7d0a6dd2 (Misiek 2021-01-29 14:54:35 +0000 122)    ],
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 123)    "source": [
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 124)     "if elevDictStatus == 0:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 125)     "    ## Request the data\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 126)     "    http = urllib3.PoolManager()\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 127)     "    # elevDict = {'locations': []}  # setup new dictionary\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 128)     "    # for loc in locations: #Redo\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 129)     "    loc_len = len(coordList)-1\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 130)     "    for loc in coordList:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 131)     "        loc_url = loc_url + str(loc[0]) + ',' + str(loc[1])\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 132)     "        if coordList.index(loc) != loc_len:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 133)     "            loc_url = loc_url + '|'\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 134)     "    try:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 135)     "        # Send request\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 136)     "        API_URL = 'https://maps.googleapis.com/maps/api/elevation/json?locations=0,0|'+loc_url+'&key='+API_KEY\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 137)     "        request = http.request('GET', API_URL)  # use |\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 138)     "        print('Request code - ' + str(request.status))\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 139)     "        locData = request.data\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 140)     "        response = json.loads(locData)\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 141)     "        print('Response status - ' + str(response['status']))\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 142)     "        print(response)\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 143)     "        # Sort Elevation data into array\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 144)     "        elevation = [[0 for i in range(areaInterval)] for j in range(areaInterval)]\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 145)     "        i = 0  # column\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 146)     "        j = 0  # row\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 147)     "        for k in range(len(coordList)):\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 148)     "            # store elevation values from the response dictionary into an array\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 149)     "            elevation[j][i] = response['results'][k+1]['elevation']\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 150)     "            i += 1\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 151)     "            if k != 0 and (k+1) % areaInterval == 0:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 152)     "                j += 1\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 153)     "                i = 0\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 154)     "        # Write result to .json file storage\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 155)     "        elevDict['locations'].append({\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 156)     "            'name': locName,\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 157)     "            'coordinate': locSelect,\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 158)     "            'width': areaWidth,\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 159)     "            'resolution': res,\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 160)     "            'elevation': elevation\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 161)     "         })\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 162)     "        with open('elevation_storage.json','w') as outfile:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 163)     "            json.dump(elevDict, outfile, indent=4)\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 164)     "            outfile.write('\\n')\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 165)     "    except ValueError:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 166)     "        print(\"Unable to request elevation\")\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 167)     "        # return\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 168)     "else:\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 169)     "    print(\"request skipped\")\n",
+225ce070 (Misiek 2021-01-29 14:41:16 +0000 170)     "\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 171)     "    # print('Elevation at point 4 - ' + str(response['results'][3]['elevation']))\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 172)     "        # print(locData['results'])\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 173)     "        # response = urllib3.request.urlopen(request).read()\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 174)     "        # places = loads(response)\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 175)     "        # print('At {0} elevation is: {1}'.format(loc, places['results'][0]['elevation']))\n",
+ead83472 (Misiek 2021-01-31 18:37:02 +0000 176)     "        # sleep(1)\n",
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 177)     "            # print('Error for location: {0}'.format(loc))"
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 178)    ]
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 179)   },
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 180)   {
+77a25046 (Misiek 2021-02-05 00:32:39 +0000 181)    "cell_type": "code",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 182)    "execution_count": 71,
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 183)    "outputs": [],
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 184)    "source": [
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 185)     "# ## Data interpolation\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 186)     "xGrid = np.arange(int(-areaInterval/2),int(areaInterval/2))\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 187)     "yGrid = np.arange(int(-areaInterval/2),int(areaInterval/2))\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 188)     "elevationInterp =  interp2d(xGrid,yGrid, elevation, kind=\"cubic\")\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 189)     "interpInterval = (distanceInterval * areaInterval) / areaWidth # Scaling of the interpolation input the to extract data at exactly distanceInterval (default 1m)\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 190)     "xNew = np.arange(int(-areaInterval/2),int(areaInterval/2), interpInterval)\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 191)     "yNew = np.arange(int(-areaInterval/2),int(areaInterval/2), interpInterval)\n",
+61ebef6b (Misiek 2021-02-11 17:23:34 +0000 192)     "elevationInterpN
