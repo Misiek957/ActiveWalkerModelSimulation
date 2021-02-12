@@ -3,6 +3,8 @@ import urllib3
 import math
 import numpy as np
 from scipy.interpolate import interp2d
+import requests
+import matplotlib.image as mpimg
 
 API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'
 areaInterval = 14  # only EVEN, above 14 package size error
@@ -124,12 +126,39 @@ class Elevation:
         # Data interpolation
         xGrid = np.arange(int(-areaInterval/2), int(areaInterval/2))
         yGrid = np.arange(int(-areaInterval/2), int(areaInterval/2))
-        elevationInterp = interp2d(xGrid, yGrid, self.elevationValues, kind="cubic")
+        elevationInterp = interp2d(xGrid, yGrid, self.elevationValues, kind="cubic")  # interpolation function
         interpInterval = (distanceInterval * areaInterval) / self.areaWidth  # Scaling of the interpolation input the to extract data at exactly distanceInterval (default 1m)
-        xNew = np.arange(int(-areaInterval/2), int(areaInterval/2), interpInterval)
+        xNew = np.arange(int(-areaInterval/2), int(areaInterval/2), interpInterval)  # define the interpolation values
         yNew = np.arange(int(-areaInterval/2), int(areaInterval/2), interpInterval)
-        elevationInterpNew = elevationInterp(xNew, yNew)
+        elevationInterpNew = elevationInterp(xNew, yNew)  # store the values
         return elevationInterpNew
+
+    def map_image_get(self):
+        #     # %% Static image of current region
+        locSelect = [53.061473, -4.085126]
+        try:  # Check if file already exists
+            img = mpimg.imread('saved_locations/' + str(locSelect) + '.png')
+            print('location image found in storage')
+        except:  # ERROR - No saved preset at location # TODO: Specify error
+            API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'
+            reqCenter = 'center=' + str(locSelect[0]) + ',' + str(locSelect[1])
+            reqZoom = '&zoom=' + str(17)
+            reqSize = '&size=' + str(500) + 'x' + str(500)
+            reqMaptype = '&maptype=' + 'satellite'
+            API_URL = 'https://maps.googleapis.com/maps/api/staticmap?' + reqCenter + reqZoom + reqSize + reqMaptype + '&key=' + API_KEY
+            response = requests.get(API_URL)
+            if response.ok:  # Status check
+                print('Request received successfully')
+            else:
+                print('Request not received')
+            with open('saved_locations/' + str(locSelect) + '.png', 'wb') as file:
+                file.write(response.content)
+            response.close()
+            img = mpimg.imread('saved_locations/' + str(locSelect) + '.png')
+        finally:
+            plt.figure(figsize=(6, 6))
+            imgplot = plt.imshow(img)
+            plt.show()
 #%%
 
 # Assuming that the Earth is a sphere with a circumference of 40075 km.
