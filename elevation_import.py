@@ -1,10 +1,12 @@
 import json
 import urllib3
-import math
 import numpy as np
 from scipy.interpolate import interp2d
 import requests
 import matplotlib.image as mpimg
+from geopy.distance import great_circle
+from geopy.distance import geodesic
+import matplotlib.pyplot as plt
 
 API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'
 areaInterval = 14  # only EVEN, above 14 package size error
@@ -16,7 +18,7 @@ with open("elevation_storage.json") as file:
 
 class Elevation:
 
-    def __init__(self, locName, locSelectLon, locSelectLat, areaWidth):
+    def __init__(self, locName, locSelectLon, locSelectLat, areaWidth, entrySelect):
         self.locName = locName
         self.locSelect = [locSelectLon, locSelectLat]  # University of Warwick - Piazza -> 52.3793,-1.5615
         self.areaWidth = areaWidth  # 420m MAX
@@ -26,7 +28,7 @@ class Elevation:
         self.elevationValues = [[None] * areaInterval for i in range(areaInterval)]  # Setup a zero matrix
         # Call initiation functions
         self.coord_check()
-        self.setup_coordinates()
+        self.entryMet = self.setup_coordinates(entrySelect)
         self.request_elevation()
 
     def coord_check(self):
@@ -45,13 +47,18 @@ class Elevation:
         if self.elevDictStatus == 0:
             print("location not found in storage")  # TODO: ERROR HANDLING
 
-
-    def setup_coordinates(self):
+    def setup_coordinates(self, entrySelect):
         # Setup Coordinates
         # TODO: Move to __init__()
-        yLen = 111320  # length in metres latitude per degree, same for all points
+        # entryMet = np.array([[0, 0]]*len(entrySelect))  # Empty array container for Entry points in M relative to center
+
+        # yLen = 111320  # length in metres latitude per degree, same for all points
+        locY = [self.locSelect[0], self.locSelect[1] + 1]
+        locX = [self.locSelect[0] + 1, self.locSelect[1]]
+        yLen = geodesic(self.locSelect, locY).meters  # length in metres at latitude per degree using great circle method / geodesic
         yDeg = (self.areaWidth/areaInterval)*(1 / yLen)  # Degree interval for each latitude unit square interval
-        xLen = 40075000 * math.cos(self.locSelect[0]) / 360  # length in metres at latitude per degree using radian rule
+        xLen = geodesic(self.locSelect, locX).meters
+        # xLen = 40075000 * np.cos(np.deg2rad(self.locSelect[0])) / 360
         xDeg = (self.areaWidth/areaInterval)*(1 / xLen)  # Degree value at longitude indicating 2m interval
         self.res = [xLen, yLen]
         # Construct an array of evenly spaced out in a 100x100 square around the selected location, according to specified
@@ -59,8 +66,13 @@ class Elevation:
             for i in range(-int(areaInterval/2), int(areaInterval/2)):
                 coX = (i*xDeg) + self.locSelect[0]
                 coY = (j*yDeg) + self.locSelect[1]
-                coXY = (coX, coY)
                 self.coordList.append((coX, coY))
+        # convert Entry lon,lat points into relative values in m
+        entryMet = (np.array(entrySelect) - np.array(self.locSelect))
+        entryMet[:, 0] = entryMet[:, 0] * xLen
+        entryMet[:, 1] = entryMet[:, 1] * yLen
+        # if max value exceeds value - throw ERROR
+        return entryMet
 
     def request_elevation(self):
         global elevDict
