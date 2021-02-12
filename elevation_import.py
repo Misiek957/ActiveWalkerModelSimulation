@@ -38,6 +38,8 @@ class Elevation:
                 self.elevationValues = elevDict['locations'][i]['elevation']
                 self.elevDictStatus = 1
                 break
+            else:
+                self.elevDictStatus = 0
         if self.elevDictStatus == 0:
             print("location not found in storage")  # TODO: ERROR HANDLING
 
