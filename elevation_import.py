@@ -169,6 +169,7 @@ class Elevation:
             img = mpimg.imread('saved_locations/' + str(locSelect) + '.png')
         finally:
             plt.figure(figsize=(6, 6))
+            # img = np.rot90(img)
             imgplot = plt.imshow(img)
             plt.show()
 #%%
