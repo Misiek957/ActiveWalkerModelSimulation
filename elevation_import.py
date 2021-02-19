@@ -7,9 +7,10 @@ import matplotlib.image as mpimg
 from geopy.distance import great_circle
 from geopy.distance import geodesic
 import matplotlib.pyplot as plt
+from scipy.interpolate import RectBivariateSpline as ReBiSpline
 
 API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'
-areaInterval = 14  # only EVEN, above 14 package size error
+areaInterval = 12  # Creates intervals of areaInterval+1
 distanceInterval = 1  # Distance in metres represented by 1 output pixel
 
 with open("elevation_storage.json") as file:
@@ -25,11 +26,13 @@ class Elevation:
         self.elevDictStatus = 0
         self.loc_url = ''
         self.coordList = []
-        self.elevationValues = [[None] * areaInterval for i in range(areaInterval)]  # Setup a zero matrix
+        self.elevationValues = [[None] * (areaInterval+1) for i in range(areaInterval+1)]  # Setup a zero matrix
+        # self.relativeGrid = np.array(np.arange())
         # Call initiation functions
         self.coord_check()
         self.entryMet = self.setup_coordinates(entrySelect)
         self.request_elevation()
+
 
     def coord_check(self):
         global elevDict
@@ -62,8 +65,8 @@ class Elevation:
         xDeg = (self.areaWidth/areaInterval)*(1 / xLen)  # Degree value at longitude indicating 2m interval
         self.res = [xLen, yLen]
         # Construct an array of evenly spaced out in a 100x100 square around the selected location, according to specified
-        for j in range(-int(areaInterval/2), int(areaInterval/2)):
-            for i in range(-int(areaInterval/2), int(areaInterval/2)):
+        for j in range(-int(areaInterval/2), int(areaInterval/2)+1):
+            for i in range(-int(areaInterval/2), int(areaInterval/2)+1):
                 coX = (i*xDeg) + self.locSelect[0]
                 coY = (j*yDeg) + self.locSelect[1]
                 self.coordList.append((coX, coY))
@@ -105,7 +108,7 @@ class Elevation:
                     # store elevation values from the response dictionary into an array
                     self.elevationValues[j][i] = response['results'][k+1]['elevation']
                     i += 1
-                    if k != 0 and (k+1) % areaInterval == 0:
+                    if k != 0 and ((k+1) % (areaInterval+1)==0):
                         j += 1
                         i = 0
                 # Write result to .json file storage
@@ -120,7 +123,9 @@ class Elevation:
                 with open('elevation_storage.json', 'w') as outfile:
                     json.dump(elevDict, outfile, indent=4)
                     outfile.write('\n')
-            except ValueError:
+            except IndexError:
+                print('Iteration indexing error')
+            else:
                 print("Unable to request elevation")  # TODO: ERROR HANDLING
                 # return
         else:
@@ -135,10 +140,9 @@ class Elevation:
                     # print('Error for location: {0}'.format(loc))
 
     def elev_interpolation(self):
-        # Data interpolation
-        xGrid = np.arange(int(-areaInterval/2), int(areaInterval/2))
-        yGrid = np.arange(int(-areaInterval/2), int(areaInterval/2))
-        elevationInterp = interp2d(xGrid, yGrid, self.elevationValues, kind="cubic")  # interpolation function
+
+        Grid = np.arange(int(-areaInterval/2), int(areaInterval/2)+1)
+        elevationInterp = interp2d(Grid, Grid, self.elevationValues, kind='cubic')  # interpolation function
         interpInterval = (distanceInterval * areaInterval) / self.areaWidth  # Scaling of the interpolation input the to extract data at exactly distanceInterval (default 1m)
         xNew = np.arange(int(-areaInterval/2), int(areaInterval/2), interpInterval)  # define the interpolation values
         yNew = np.arange(int(-areaInterval/2), int(areaInterval/2), interpInterval)
@@ -148,9 +152,11 @@ class Elevation:
     def map_image_get(self):
         #     # %% Static image of current region
         locSelect = [53.061473, -4.085126]
-        try:  # Check if file already exists
+        if 1 == 1:  # Check if file already exists
             img = mpimg.imread('saved_locations/' + str(locSelect) + '.png')
             print('location image found in storage')
+        try:
+            pass
         except:  # ERROR - No saved preset at location # TODO: Specify error
             API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'
             reqCenter = 'center=' + str(locSelect[0]) + ',' + str(locSelect[1])
