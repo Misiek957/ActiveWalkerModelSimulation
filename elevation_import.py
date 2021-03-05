@@ -125,9 +125,9 @@ class Elevation:
                     outfile.write('\n')
             except IndexError:
                 print('Iteration indexing error')
-            else:
-                print("Unable to request elevation")  # TODO: ERROR HANDLING
-                # return
+            # else:
+            #     print("Unable to request elevation")  # TODO: ERROR HANDLING
+            #     # return
         else:
             print("request skipped")
 
@@ -151,15 +151,12 @@ class Elevation:
 
     def map_image_get(self):
         #     # %% Static image of current region
-        locSelect = [53.061473, -4.085126]
-        if 1 == 1:  # Check if file already exists
-            img = mpimg.imread('saved_locations/' + str(locSelect) + '.png')
-            print('location image found in storage')
-        try:
-            pass
-        except:  # ERROR - No saved preset at location # TODO: Specify error
+        # locSelect = [53.061473, -4.085126]
+        try: # Check if file already exists
+            img = mpimg.imread('saved_locations/' + str(self.locSelect) + '.png')
+        except FileNotFoundError:  # ERROR - No saved preset at location # TODO: Specify error
             API_KEY = 'AIzaSyBaoamIS4eiYrmP8tI9kvmtfRSE8ZXrWoQ'
-            reqCenter = 'center=' + str(locSelect[0]) + ',' + str(locSelect[1])
+            reqCenter = 'center=' + str(self.locSelect[0]) + ',' + str(self.locSelect[1])
             reqZoom = '&zoom=' + str(17)
             reqSize = '&size=' + str(500) + 'x' + str(500)
             reqMaptype = '&maptype=' + 'satellite'
@@ -169,10 +166,10 @@ class Elevation:
                 print('Request received successfully')
             else:
                 print('Request not received')
-            with open('saved_locations/' + str(locSelect) + '.png', 'wb') as file:
+            with open('saved_locations/' + str(self.locSelect) + '.png', 'wb') as file:
                 file.write(response.content)
             response.close()
-            img = mpimg.imread('saved_locations/' + str(locSelect) + '.png')
+            img = mpimg.imread('saved_locations/' + str(self.locSelect) + '.png')
         finally:
             plt.figure(figsize=(6, 6))
             # img = np.rot90(img)
