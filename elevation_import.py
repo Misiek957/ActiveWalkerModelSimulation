@@ -93,7 +93,7 @@ class Elevation:
                 # Send request
                 API_URL = 'https://maps.googleapis.com/maps/api/elevation/json?locations=0,0|'+self.loc_url+'&key='+API_KEY
                 request = http.request('GET', API_URL)  # use |
-                print('Request code - ' + str(request.status))
+                print('Request code - ' + str(request.status)) # Informative output
                 locData = request.data
                 response = json.loads(locData)
                 print('Response status - ' + str(response['status']))
@@ -104,6 +104,7 @@ class Elevation:
 
                 i = 0  # column
                 j = 0  # row
+                # store the elevation values from the dictionary into a 2 dimensional array
                 for k in range(len(self.coordList)):
                     # store elevation values from the response dictionary into an array
                     self.elevationValues[j][i] = response['results'][k+1]['elevation']
@@ -140,7 +141,7 @@ class Elevation:
                     # print('Error for location: {0}'.format(loc))
 
     def elev_interpolation(self):
-        self.elevationValues = np.transpose(np.fromfunction(lambda i, j: areaInterval-i+1, (areaInterval+1, areaInterval+1), dtype = float))
+        # self.elevationValues = np.transpose(np.fromfunction(lambda i, j: areaInterval-i+1, (areaInterval+1, areaInterval+1), dtype = float))
         Grid = np.arange(int(-areaInterval/2), int(areaInterval/2)+1)
         elevationInterp = interp2d(Grid, Grid, self.elevationValues, kind='cubic')  # interpolation function
         interpInterval = (distanceInterval * areaInterval) / self.areaWidth  # Scaling of the interpolation input the to extract data at exactly distanceInterval (default 1m)
