@@ -25,3 +25,6 @@ Walker Model* and the elevation input interface, in modelling pedestrian paths o
 surfaces. Namely, the insufficient consideration for extraneous variables of high influence on
 human pedestrian behaviour such as obstructing vegetation or unfavourable ground conditions,
 which are might be a subject for further potential research.
+
+Full Thesis at:
+https://drive.google.com/file/d/1QKgeoUKkkXJCeAyqWy4E0drYYjMHjY5W/view?usp=sharing
